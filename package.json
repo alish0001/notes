@@ -1,0 +1,19 @@
+{
+  "name": "notes",
+  "version": "1.0.0",
+  "description": "scalable RESTful API that allows users to create, read, update, and delete notes.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alish0001/notes"
+  },
+  "author": "Alish Sapkota",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alish0001/notes/issues"
+  },
+  "homepage": "https://github.com/alish0001/notes#readme"
+}
