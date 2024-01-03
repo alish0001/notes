@@ -1,13 +1,14 @@
 const mongoose = require("mongoose");
 const logger = require("./config/winston");
 const databaseConfig = require("./config/databaseConfig");
+const serverConfig = require("./config/serverConfig");
 
 const initServer = () => {
   mongoose.Promise = global.Promise;
   mongoose.connect(databaseConfig.databaseConnectionString);
 
   const db = mongoose.connection;
-  const PORT = process.env.PORT | 8080;
+  const PORT = serverConfig.port | 8080;
 
   db.on("error", (err) => {
     logger.error("Mongoose Error", err);
