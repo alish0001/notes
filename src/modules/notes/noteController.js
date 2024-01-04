@@ -22,7 +22,7 @@ const getAllNotes = async (req, res) => {
     .project({ content: 1, _id: 0 });
 
   const records = await recordsCursor.toArray();
-
+  logger.info("Successfully retrived the notes for the user");
   return res.status(200).json({
     success: true,
     message: "Successfully retrived the notes for user",
@@ -76,6 +76,7 @@ const getANote = async (req, res) => {
     record?.userEmail === userEmail ||
     record?.allowedUsers?.includes(userEmail)
   ) {
+    logger.info("Successfully retrived the Note");
     return res.status(200).json({
       success: true,
       message: "Successfully retrived the Note",
@@ -122,6 +123,7 @@ const updateANote = async (req, res) => {
   if (!record) {
     throw new NotFoundError("Note with given id not present in the system");
   }
+  logger.info("Successfully Updated the Note");
   return res.status(200).json({
     success: true,
     message: "Successfully Updated the Note",
@@ -156,7 +158,7 @@ const softDeleteANote = async (req, res) => {
   if (!record) {
     throw new NotFoundError("Note with given id not present in the system");
   }
-
+  logger.info("Successfully Deleted the Note");
   return res.status(200).json({
     success: true,
     message: "Successfully Deleted the Note",
@@ -225,7 +227,7 @@ const shareANote = async (req, res) => {
       "Notes With Given Id is Not present in the system "
     );
   }
-
+  logger.info("Successfully executed the share the note feature");
   return res.status(200).json({
     success: true,
     message: `Successfully shared the Note, with user: ${email}`,

@@ -4,7 +4,10 @@ const Schema = mongoose.Schema;
 const notesSchema = new Schema({
   userEmail: String,
   isDeleted: Boolean,
-  content: String,
+  content: {
+    type: String,
+    index: "text",
+  },
   createdAt: Date,
   updatedAt: Date,
   allowedUsers: [String],
