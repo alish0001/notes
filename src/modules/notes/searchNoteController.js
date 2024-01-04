@@ -12,12 +12,10 @@ const searchNotes = async (req, res) => {
   const query = req.query.q;
   const userEmail = req.body.userEmail;
 
-  const regexQuery = new RegExp(query, "i");
-
   const recordsCursor = Notes.collection
     .find({
       $and: [
-        { content: { $regex: regexQuery } },
+        { $text: { $search: query } },
         { userEmail: userEmail },
         { isDeleted: false },
       ],
