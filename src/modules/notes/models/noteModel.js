@@ -7,6 +7,7 @@ const notesSchema = new Schema({
   content: String,
   createdAt: Date,
   updatedAt: Date,
+  allowedUsers: [String],
 });
 
 const Notes = mongoose.model("notes", notesSchema);
