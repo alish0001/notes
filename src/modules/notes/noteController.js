@@ -10,10 +10,24 @@ const Notes = require("./models/noteModel");
 const ObjectId = require("mongodb").ObjectId;
 
 const getAllNotes = async (req, res) => {
+  logger.info("Incoming Request For get all the notes for user", req.body);
+  const { userEmail } = req.body;
+  const currentDateTime = new Date();
+
+  const recordsCursor = Notes.collection
+    .find({
+      userEmail: userEmail,
+      isDeleted: false,
+    })
+    .project({ content: 1, _id: 0 });
+
+  const records = await recordsCursor.toArray();
+
   return res.status(200).json({
     success: true,
     message: "Successfully retrived the notes for user",
-    data: {},
+    data: records,
+    timestamp: currentDateTime,
   });
 };
 
@@ -30,6 +44,7 @@ const createNote = async (req, res) => {
   const insertedRecord = await Notes.collection.insertOne({
     ...body,
     createAt: currentDateTime,
+    updatedAt: currentDateTime,
     isDeleted: false,
   });
   logger.info("Successfully created Note");
@@ -40,13 +55,14 @@ const createNote = async (req, res) => {
     data: {
       noteId: insertedRecord.insertedId,
     },
+    timestamp: currentDateTime,
   });
 };
 
 const getANote = async (req, res) => {
   logger.info("Incoming request for get note", { params: req.params });
   const noteId = req.params.id;
-
+  const currentDateTime = new Date();
   if (!noteId || !ObjectId.isValid(noteId)) {
     throw new CustomBadRequestError("Please Provide Proper Id");
   }
@@ -54,6 +70,7 @@ const getANote = async (req, res) => {
   const record = await Notes.collection.findOne({
     _id: new ObjectId(noteId),
     isDeleted: false,
+    userEmail: req.body.userEmail,
   });
 
   if (record) {
@@ -64,6 +81,7 @@ const getANote = async (req, res) => {
         userEmail: record.userEmail,
         content: record.content,
       },
+      timestamp: currentDateTime,
     });
   }
 
@@ -78,7 +96,7 @@ const updateANote = async (req, res) => {
   );
   const currentDateTime = new Date();
   const noteId = req.params.id;
-  const { content } = req.body;
+  const { content, userEmail } = req.body;
 
   const validated = validateUpdateNote(req.body, noteId);
   if (validated && validated.length) {
@@ -89,6 +107,7 @@ const updateANote = async (req, res) => {
     {
       _id: new ObjectId(noteId),
       isDeleted: false,
+      userEmail: userEmail,
     },
     {
       $set: {
@@ -118,11 +137,11 @@ const softDeleteANote = async (req, res) => {
   if (!noteId || !ObjectId.isValid(noteId)) {
     throw new CustomBadRequestError("Please Provide Proper Id");
   }
-
   const record = await Notes.collection.findOneAndUpdate(
     {
       _id: new ObjectId(noteId),
       isDeleted: false,
+      userEmail: req.body.userEmail,
     },
     {
       $set: {
@@ -140,8 +159,9 @@ const softDeleteANote = async (req, res) => {
     success: true,
     message: "Successfully Deleted the Note",
     data: {
-      noteId: record.insertedId,
+      noteId,
     },
+    timestamp: currentDateTime,
   });
 };
 module.exports = {
