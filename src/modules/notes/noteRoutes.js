@@ -1,4 +1,5 @@
 const Router = require("express-promise-router");
+const verifyJWT = require("../../middlewares/verifyAccessToken");
 const {
   getAllNotes,
   createNote,
@@ -9,11 +10,12 @@ const {
 
 const routes = () => {
   const router = Router({ mergeParams: true });
-  router.route("/").get(getAllNotes).post(createNote);
-  router.route("/:id").get(getANote).put(updateANote).delete(softDeleteANote);
-  router.route("/healthcheck").get((req, res) => {
-    res.send("Notes service is up and running");
-  });
+  router.route("/").get(verifyJWT, getAllNotes).post(verifyJWT, createNote);
+  router
+    .route("/:id")
+    .get(verifyJWT, getANote)
+    .put(verifyJWT, updateANote)
+    .delete(verifyJWT, softDeleteANote);
   return router;
 };
 

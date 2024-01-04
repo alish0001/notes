@@ -1,12 +1,31 @@
 const logger = require("../config/winston");
 
 class HttpError extends Error {}
+
 class CustomBadRequestError extends HttpError {
   constructor(message) {
     super(message);
     this.name = this.constructor.name;
     this.message = message || "Invalid request";
     this.status = 400;
+  }
+}
+
+class ForbiddenError extends HttpError {
+  constructor(message) {
+    super();
+    this.name = this.constructor.name;
+    this.message = message || "User is not authorized";
+    this.status = 403;
+  }
+}
+
+class ConflictError extends HttpError {
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name;
+    this.message = message || "Record already exists";
+    this.status = 409;
   }
 }
 
@@ -18,6 +37,16 @@ class NotFoundError extends HttpError {
     this.status = 404;
   }
 }
+
+class UnauthorizedError extends HttpError {
+  constructor(message) {
+    super();
+    this.name = this.constructor.name;
+    this.message = message || "Unauthorized";
+    this.status = 401;
+  }
+}
+
 function getErrorMessage(err) {
   if (err instanceof HttpError) {
     return {
@@ -47,5 +76,8 @@ module.exports = {
   CustomBadRequestError,
   HttpError,
   NotFoundError,
+  ConflictError,
   getErrorMessage,
+  ForbiddenError,
+  UnauthorizedError,
 };

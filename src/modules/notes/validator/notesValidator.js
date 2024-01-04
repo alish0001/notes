@@ -24,6 +24,10 @@ const validateCreateNote = (body) => {
 
 const validateUpdateNote = (body, id) => {
   const schema = Joi.object({
+    userEmail: Joi.string().email().required().messages({
+      "string.email": "Please provide a valid user email",
+      "any.required": "User email is required",
+    }),
     content: Joi.string()
       .required()
       .max(parseInt(config.maximumAllowedNoteSize, 10))
