@@ -1,3 +1,4 @@
+const serverConfig = require("../config/serverConfig");
 const {
   CustomBadRequestError,
   RateLimitExceedError,
@@ -37,10 +38,10 @@ const ipLevelRateLimiting = async (req, res, next) => {
     const timeDifference = newRequestAttempt - firstAttempt;
     const ipHitCount = ipEntry.hitCount + 1;
 
-    if (
-      ipEntry.isBlocked &&
-      timeDifference > parseInt(process.env.IP_RETRY_TIME)
-    ) {
+    const ipRetryTime = serverConfig.ipRetryTime;
+    const hitCount = serverConfig.hitCount;
+    const windowDuration = serverConfig.windowDuration;
+    if (ipEntry.isBlocked && timeDifference > parseInt(ipRetryTime)) {
       // If IP is blocked and retry time has elapsed, unblock and allow the request
       await IpModel.updateOne(
         { $and: [{ ipAddress: reqIpAddress }] },
@@ -49,14 +50,14 @@ const ipLevelRateLimiting = async (req, res, next) => {
     } else if (
       // If IP is blocked and within the retry time, deny the request
       ipEntry.isBlocked &&
-      timeDifference < parseInt(process.env.IP_RETRY_TIME)
+      timeDifference < parseInt(ipRetryTime)
     ) {
       throw new RateLimitExceedError();
     } else if (
       // If IP is not blocked but exceeds hit count within the window, block the IP
       !ipEntry.isBlocked &&
-      ipHitCount > parseInt(process.env.HIT_COUNT) &&
-      timeDifference < parseInt(process.env.WINDOW_DURATION)
+      ipHitCount > parseInt(hitCount) &&
+      timeDifference < parseInt(windowDuration)
     ) {
       await IpModel.updateOne(
         { $and: [{ ipAddress: reqIpAddress }] },
@@ -65,8 +66,8 @@ const ipLevelRateLimiting = async (req, res, next) => {
       throw new RateLimitExceedError();
     } else if (
       !ipEntry.isBlocked &&
-      timeDifference < parseInt(process.env.WINDOW_DURATION) &&
-      ipHitCount <= parseInt(process.env.HIT_COUNT)
+      timeDifference < parseInt(windowDuration) &&
+      ipHitCount <= parseInt(hitCount)
     ) {
       // If IP is not blocked, within the window, and within the hit count, increment hit count
       await IpModel.updateOne(
@@ -75,8 +76,8 @@ const ipLevelRateLimiting = async (req, res, next) => {
       );
     } else if (
       !ipEntry.isBlocked &&
-      timeDifference > parseInt(process.env.WINDOW_DURATION) &&
-      ipHitCount <= parseInt(process.env.HIT_COUNT)
+      timeDifference > parseInt(windowDuration) &&
+      ipHitCount <= parseInt(hitCount)
     ) {
       // If IP is not blocked, outside the window, and within the hit count, reset hit count
       await IpModel.updateOne(
