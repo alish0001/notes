@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  #mongoDB services
+  mongo_db:
+    container_name: mongo_db_container
+    image: mongo:latest
+    restart: always
+    volumes:
+      - "mongo_db:/data/db"
+
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      MONGO_DB_URI: mongodb://mongo_db_container:27017
+      ACCESS_TOKEN_SECRET: "$(openssl rand -hex 32)"
+    depends_on:
+      - "mongo_db"
+
+volumes:
+  mongo_db: {}
