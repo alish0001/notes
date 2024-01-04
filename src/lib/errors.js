@@ -29,6 +29,15 @@ class ConflictError extends HttpError {
   }
 }
 
+class RateLimitExceedError extends HttpError {
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name;
+    this.message = message || "Rate Limit Exceed";
+    this.status = 429;
+  }
+}
+
 class NotFoundError extends HttpError {
   constructor(message) {
     super();
@@ -80,4 +89,5 @@ module.exports = {
   getErrorMessage,
   ForbiddenError,
   UnauthorizedError,
+  RateLimitExceedError,
 };
