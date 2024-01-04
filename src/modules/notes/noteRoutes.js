@@ -1,5 +1,6 @@
 const Router = require("express-promise-router");
 const verifyJWT = require("../../middlewares/verifyAccessToken");
+const ipLevelRateLimiting = require("../../middlewares/ipLevelRateLimitingMiddleWare");
 const {
   getAllNotes,
   createNote,
@@ -14,10 +15,10 @@ const routes = () => {
   router.route("/").get(verifyJWT, getAllNotes).post(verifyJWT, createNote);
   router
     .route("/:id")
-    .get(verifyJWT, getANote)
-    .put(verifyJWT, updateANote)
-    .delete(verifyJWT, softDeleteANote);
-  router.post("/:id/share", verifyJWT, shareANote);
+    .get(ipLevelRateLimiting, verifyJWT, getANote)
+    .put(ipLevelRateLimiting, verifyJWT, updateANote)
+    .delete(ipLevelRateLimiting, verifyJWT, softDeleteANote);
+  router.post("/:id/share", ipLevelRateLimiting, verifyJWT, shareANote);
   return router;
 };
 

@@ -71,7 +71,6 @@ const getANote = async (req, res) => {
     _id: new ObjectId(noteId),
     isDeleted: false,
   });
-
   if (
     record?.userEmail === userEmail ||
     record?.allowedUsers?.includes(userEmail)
