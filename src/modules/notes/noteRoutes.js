@@ -6,6 +6,7 @@ const {
   getANote,
   updateANote,
   softDeleteANote,
+  shareANote,
 } = require("./noteController");
 
 const routes = () => {
@@ -16,6 +17,7 @@ const routes = () => {
     .get(verifyJWT, getANote)
     .put(verifyJWT, updateANote)
     .delete(verifyJWT, softDeleteANote);
+  router.post("/:id/share", verifyJWT, shareANote);
   return router;
 };
 

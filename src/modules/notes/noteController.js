@@ -66,14 +66,16 @@ const getANote = async (req, res) => {
   if (!noteId || !ObjectId.isValid(noteId)) {
     throw new CustomBadRequestError("Please Provide Proper Id");
   }
-
+  const userEmail = req.body.userEmail;
   const record = await Notes.collection.findOne({
     _id: new ObjectId(noteId),
     isDeleted: false,
-    userEmail: req.body.userEmail,
   });
 
-  if (record) {
+  if (
+    record?.userEmail === userEmail ||
+    record?.allowedUsers?.includes(userEmail)
+  ) {
     return res.status(200).json({
       success: true,
       message: "Successfully retrived the Note",
@@ -164,10 +166,80 @@ const softDeleteANote = async (req, res) => {
     timestamp: currentDateTime,
   });
 };
+
+const shareANote = async (req, res) => {
+  logger.info(
+    "Incoming Request for share a note",
+    { params: req.params },
+    { body: req.body }
+  );
+
+  const currentDateTime = new Date();
+  const { userEmail, email } = req.body;
+  const noteId = req.params.id;
+
+  if (!email || !isValidEmail(email)) {
+    throw new CustomBadRequestError("Please Provide the proper valid email");
+  }
+  if (!noteId || !ObjectId.isValid(noteId)) {
+    throw new CustomBadRequestError("Please Provide the proper valid id");
+  }
+
+  const allowedUsersRecords = await Notes.collection.findOne(
+    {
+      _id: new ObjectId(noteId),
+      isDeleted: false,
+      userEmail: userEmail,
+    },
+    { projection: { allowedUsers: 1, _id: 0 } }
+  );
+  const allowedUsers = allowedUsersRecords.allowedUsers;
+
+  if (allowedUsers.includes(email)) {
+    logger.info(`${email}: is already present in the record`);
+    return res.status(200).json({
+      success: true,
+      message: `Successfully shared the Note, with user: ${email}`,
+      data: {
+        noteId,
+      },
+      timestamp: currentDateTime,
+    });
+  }
+
+  const record = await Notes.collection.findOneAndUpdate(
+    {
+      _id: new ObjectId(noteId),
+      isDeleted: false,
+      userEmail: userEmail,
+    },
+    {
+      $push: {
+        allowedUsers: email,
+      },
+    }
+  );
+
+  if (!record) {
+    throw new NotFoundError(
+      "Notes With Given Id is Not present in the system "
+    );
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: `Successfully shared the Note, with user: ${email}`,
+    data: {
+      noteId,
+    },
+    timestamp: currentDateTime,
+  });
+};
 module.exports = {
   getAllNotes,
   createNote,
   getANote,
   updateANote,
   softDeleteANote,
+  shareANote,
 };
