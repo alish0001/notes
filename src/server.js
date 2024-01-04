@@ -4,11 +4,19 @@ const databaseConfig = require("./config/databaseConfig");
 const serverConfig = require("./config/serverConfig");
 
 const initServer = () => {
+  if (!serverConfig.dbUri) {
+    logger.error("Please provide database URI in env file");
+    return;
+  }
+  if (!serverConfig.accessToken) {
+    logger.error("Please provide accessToken in env file");
+    return;
+  }
   mongoose.Promise = global.Promise;
   mongoose.connect(databaseConfig.databaseConnectionString);
 
   const db = mongoose.connection;
-  const PORT = serverConfig.port | 8080;
+  const PORT = serverConfig.port;
 
   db.on("error", (err) => {
     logger.error("Mongoose Error", err);
