@@ -1,12 +1,12 @@
 # notes
 
-Scalable RESTful API that allows users to create, read, update, and delete notes.
+Scalable RESTful API that allows users to create, read, update, share, and delete notes.
 
 ## choice of framework
 
 First of all node js library is used in the project. The projects mainly deals with the I/O operations. Node js is proficient to deal with I/O;
 
-## choide of db
+## choice of db
 
 Mongo Db is used because I am familiar with mongo db. Rate limiting could have been further more inhanced with the help of redis.
 
