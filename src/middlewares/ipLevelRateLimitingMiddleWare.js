@@ -76,10 +76,9 @@ const ipLevelRateLimiting = async (req, res, next) => {
       );
     } else if (
       !ipEntry.isBlocked &&
-      timeDifference > parseInt(windowDuration) &&
-      ipHitCount <= parseInt(hitCount)
+      timeDifference > parseInt(windowDuration)
     ) {
-      // If IP is not blocked, outside the window, and within the hit count, reset hit count
+      // If IP is not blocked, outside the window, reset hit count
       await IpModel.updateOne(
         { $and: [{ ipAddress: reqIpAddress }] },
         { $set: { hitCount: 1, createdTime: Date.now() } }

@@ -12,7 +12,10 @@ const {
 
 const routes = () => {
   const router = Router({ mergeParams: true });
-  router.route("/").get(verifyJWT, getAllNotes).post(verifyJWT, createNote);
+  router
+    .route("/")
+    .get(ipLevelRateLimiting, verifyJWT, getAllNotes)
+    .post(ipLevelRateLimiting, verifyJWT, createNote);
   router
     .route("/:id")
     .get(ipLevelRateLimiting, verifyJWT, getANote)
